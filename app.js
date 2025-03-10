@@ -1,0 +1,29 @@
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const dotenv = require('dotenv');
+dotenv.config();
+app.use(cors());
+app.options("*", cors());
+
+app.use(bodyParser.json());
+
+// Routes..
+const categoryRoutes = require('./routes/category')
+app.use('/api/v1',categoryRoutes)
+
+const products = require('./routes/products')
+app.use('/api/v1',products)
+
+mongoose.connect(process.env.CONNECTION_STRING,{}).then(()=>{
+    console.log(`DataBase connected to ${process.env.CONNECTION_STRING}`);
+}).catch((error) =>{
+    console.log(error);
+    
+})
+
+app.listen(process.env.PORT,() =>{
+    console.log(`server is running on http://localhost:${process.env.PORT}`);  
+})
