@@ -77,7 +77,7 @@ router.get("/get-category", async (req, res) => {
   }
 });
 
-router.get("/get-categories/:id", async (req, res) => {
+router.get("/get-category/:id", async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
