@@ -25,65 +25,69 @@ router.get("/get-product", async (req, res) => {
 
 router.post("/create-product", async (req, res) => {
   try {
+    // Check if category exists
     const category = await Category.findById(req.body.category);
     if (!category) {
       return res.status(404).json({ message: "Invalid Category!" });
     }
 
-    const limit = pLimit(2);
-
-    if (!req.body.images || !Array.isArray(req.body.images)) {
+    // Validate images array
+    if (!req.body.images || !Array.isArray(req.body.images) || req.body.images.length === 0) {
       return res.status(400).json({
         message: "Invalid images array",
         success: false,
       });
     }
 
-    // Upload images concurrently with limit
+    // Upload images concurrently (max 2 at a time)
+    const limit = pLimit(2);
     const imagesToUpload = req.body.images.map((image) =>
       limit(async () => {
         try {
-          return await cloudinary.uploader.upload(image);
+          const result = await cloudinary.uploader.upload(image);
+          return { public_id: result.public_id, url: result.secure_url };
         } catch (error) {
-          return { error: error.message }; // Capture individual errors
+          return { error: error.message };
         }
       })
     );
 
-    const uploadStatus = await Promise.all(imagesToUpload);
+    const uploadResults = await Promise.all(imagesToUpload);
 
-    // Extract successful image URLs and filter out failed uploads
-    const imgUrl = uploadStatus
-      .filter((item) => !item.error)
-      .map((item) => item.secure_url);
+    // Extract successful image uploads
+    const uploadedImages = uploadResults.filter((img) => !img.error);
 
-    // If all uploads failed
-    if (imgUrl.length === 0) {
+    // If no images uploaded successfully
+    if (uploadedImages.length === 0) {
       return res.status(500).json({
-        message: "Images upload failed",
+        message: "Image upload failed",
         success: false,
-        errors: uploadStatus.filter((item) => item.error),
+        errors: uploadResults.filter((img) => img.error),
       });
     }
 
-    // Create Product
-    let product = new Products({
+    // Create and save new product
+    const product = new Products({
       name: req.body.name,
       description: req.body.description,
-      images: req.body.images,
+      images: uploadedImages, // Store images correctly
       brand: req.body.brand,
       price: req.body.price,
+      oldPrice: req.body.oldPrice || 0, // Default if not provided
+      discount: req.body.discount || 0,
       category: req.body.category,
+      subCategory: req.body.subCategory, // Added subCategory
       countInStock: req.body.countInStock,
-      rating: req.body.rating,
-      numReviews: req.body.numReviews,
-      ifFeatured: req.body.ifFeatured,
+      weight: req.body.weight || [], // Default to empty array
+      quantity: req.body.quantity || [],
+      rating: req.body.rating || 0,
+      isFeatured: req.body.isFeatured || false, // Fixed naming issue
     });
+
     await product.save();
 
-    // Send success response
     return res.status(201).json({
-      message: "Product added successfully.",
+      message: "Product added successfully",
       success: true,
       product,
     });

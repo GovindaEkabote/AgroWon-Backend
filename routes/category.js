@@ -1,4 +1,4 @@
-const Category  = require("../models/category");
+const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary");
 const express = require("express");
 const pLimit = require("p-limit");
@@ -67,11 +67,27 @@ router.post("/create", async (req, res) => {
 
 router.get("/get-category", async (req, res) => {
   try {
-    const categoryList = await Category.find();
+    const page = parseInt(req.query.page) || 1;
+    const perPage = 6;
+    const totalPosts = await Category.countDocuments();
+    const totalPages = Math.ceil(totalPosts / perPage);
+    if (page > totalPages) {
+      return res.status(404).json({ message: "Page Not Found" });
+    }
+
+    const categoryList = await Category.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
+
     if (!categoryList || categoryList == 0) {
       return res.status(401).json({ message: "Product Categories Not Found" });
     }
-    res.status(200).json(categoryList);
+    res.status(200).json({
+      "categoryList": categoryList,
+      "totalPages": totalPages,
+      "page": page,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
