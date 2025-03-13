@@ -1,9 +1,3 @@
-I have a project. In the root directory are these 4 files:
-
-.env .env.example .env.local .env.staging
-
-I have a .gitignore file, and I'm listing these 4 files in the .gitignore, one after another, like this
-
 .env
 .env.example
 .env.local
