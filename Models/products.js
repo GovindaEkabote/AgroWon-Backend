@@ -14,7 +14,7 @@ const productSchema = mongoose.Schema({
     ref: 'Category',
     required: true,
   },
-  subCategory: {  // Fixed Typo
+  subCategory: { 
     type: String,
     required: true,
   },

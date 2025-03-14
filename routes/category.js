@@ -67,12 +67,17 @@ router.post("/create", async (req, res) => {
 
 router.get("/get-category", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const { page, all } = req.query;
     const perPage = 6;
     const totalPosts = await Category.countDocuments();
     const totalPages = Math.ceil(totalPosts / perPage);
     if (page > totalPages) {
       return res.status(404).json({ message: "Page Not Found" });
+    }
+    
+    if (all === "true") {
+      const categoryList = await Category.find();
+      return res.json({ categoryList });
     }
 
     const categoryList = await Category.find()

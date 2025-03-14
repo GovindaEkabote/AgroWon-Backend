@@ -1,5 +1,5 @@
 const express = require("express");
-const Products = require("../models/pro ducts");
+const Products = require("../models/products");
 const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary");
 const pLimit = require("p-limit");
