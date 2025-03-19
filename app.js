@@ -11,6 +11,8 @@ app.options("*", cors());
 app.use(bodyParser.json());
 
 // Routes..
+
+app.use('/uploads', express.static('uploads'))
 const categoryRoutes = require('./routes/category')
 app.use('/api/v1',categoryRoutes)
 
