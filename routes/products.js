@@ -3,7 +3,7 @@ const Products = require("../models/products");
 const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary");
 const pLimit = require("p-limit");
-
+const fs = require('fs')
 const router = express.Router();
 
 router.get("/get-product", async (req, res) => {
@@ -102,10 +102,24 @@ router.post("/create-product", async (req, res) => {
 
 router.delete("/delete-product/:id", async (req, res) => {
   try {
-    const deleteProduct = await Products.findByIdAndDelete(req.params.id);
+    const deleteProduct = await Products.findById(req.params.id);
     if (!deleteProduct) {
       return res.status(401).json({ message: "Product Not Found" });
     }
+    
+    const deleteImages = deleteProduct.images;
+
+    if(deleteImages.length > 0){
+      for(const image of deleteImages){
+        try {
+          await cloudinary.uploader.destroy(image.public_id)
+        } catch (error) {
+          console.error(`Failed to delete image ${image.public_id}:`, error);
+        }
+      }
+    }
+    await Products.findByIdAndDelete(req.params.id);
+   
     res.status(200).json({
       message: "the product deleted successfully",
       success: true,
