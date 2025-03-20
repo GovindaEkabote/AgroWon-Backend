@@ -151,54 +151,14 @@ router.get("/get/:id", async (req, res) => {
 
 router.put("/update/:id", async (req, res) => {
   try {
-    const limit = pLimit(2);
-
-    if (!req.body.images || !Array.isArray(req.body.images)) {
-      return res.status(400).json({
-        message: "Invalid images array",
-        success: false,
-      });
-    }
-
-    // Upload images concurrently with limit
-    const imagesToUpload = req.body.images.map((image) =>
-      limit(async () => {
-        try {
-          return await cloudinary.uploader.upload(image);
-        } catch (error) {
-          return { error: error.message }; // Capture individual errors
-        }
-      })
-    );
-
-    const uploadStatus = await Promise.all(imagesToUpload);
-
-    // Extract successful image URLs and filter out failed uploads
-    const imgUrl = uploadStatus
-      .filter((item) => !item.error)
-      .map((item) => item.secure_url);
-
-    // If all uploads failed
-    if (imgUrl.length === 0) {
-      return res.status(500).json({
-        message: "Images upload failed",
-        success: false,
-        errors: uploadStatus.filter((item) => item.error),
-      });
-    }
-
     const update = await Products.findByIdAndUpdate(
       req.params.id,
       {
         name: req.body.name,
         description: req.body.description,
-        images: req.body.images,
         brand: req.body.brand,
-        price: req.body.price,
-        category: req.body.category,
-        countInStock: req.body.countInStock,
-        rating: req.body.rating,
-        numReviews: req.body.numReviews,
+        price: req.body.price,        
+        countInStock: req.body.countInStock,       
         ifFeatured: req.body.ifFeatured,
       },
       {
