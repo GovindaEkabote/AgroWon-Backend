@@ -160,6 +160,7 @@ router.put("/update/:id", async (req, res) => {
         price: req.body.price,        
         countInStock: req.body.countInStock,       
         ifFeatured: req.body.ifFeatured,
+        subCategory:req.body.subCategory
       },
       {
         new: true,
