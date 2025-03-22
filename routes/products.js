@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/get-product", async (req, res) => {
   try {
     const { page, all } = req.query;
-    const perPage = 6;
+    const perPage = 5;
     const totalPosts = await Products.countDocuments();
     const totalPages = Math.ceil(totalPosts / perPage);
     if (page > totalPages) {
@@ -30,7 +30,7 @@ router.get("/get-product", async (req, res) => {
     }
     res
       .status(200)
-      .json({ success: true, products, total: totalPages, page: page });
+      .json({ success: true, "products":products, totalPages: totalPages, page: page });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
