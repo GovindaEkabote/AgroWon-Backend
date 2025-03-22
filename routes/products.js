@@ -3,17 +3,34 @@ const Products = require("../models/products");
 const Category = require("../models/category");
 const cloudinary = require("../config/cloudinary");
 const pLimit = require("p-limit");
-const fs = require('fs')
+const fs = require("fs");
 const router = express.Router();
 
 router.get("/get-product", async (req, res) => {
   try {
-    const products = await Products.find().populate("category");
-    const totalProducts = await Products.countDocuments();
+    const { page, all } = req.query;
+    const perPage = 6;
+    const totalPosts = await Products.countDocuments();
+    const totalPages = Math.ceil(totalPosts / perPage);
+    if (page > totalPages) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+    if (all === "true") {
+      const categoryList = await Products.find();
+      return res.json({ categoryList });
+    }
+    const products = await Products.find()
+      .populate("category")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
+
     if (!products) {
       return res.status(500).json({ message: "Product Not Found.." });
     }
-    res.status(200).json({ success: true, total: totalProducts, products });
+    res
+      .status(200)
+      .json({ success: true, products, total: totalPages, page: page });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
@@ -32,7 +49,11 @@ router.post("/create-product", async (req, res) => {
     }
 
     // Validate images array
-    if (!req.body.images || !Array.isArray(req.body.images) || req.body.images.length === 0) {
+    if (
+      !req.body.images ||
+      !Array.isArray(req.body.images) ||
+      req.body.images.length === 0
+    ) {
       return res.status(400).json({
         message: "Invalid images array",
         success: false,
@@ -106,20 +127,20 @@ router.delete("/delete-product/:id", async (req, res) => {
     if (!deleteProduct) {
       return res.status(401).json({ message: "Product Not Found" });
     }
-    
+
     const deleteImages = deleteProduct.images;
 
-    if(deleteImages.length > 0){
-      for(const image of deleteImages){
+    if (deleteImages.length > 0) {
+      for (const image of deleteImages) {
         try {
-          await cloudinary.uploader.destroy(image.public_id)
+          await cloudinary.uploader.destroy(image.public_id);
         } catch (error) {
           console.error(`Failed to delete image ${image.public_id}:`, error);
         }
       }
     }
     await Products.findByIdAndDelete(req.params.id);
-   
+
     res.status(200).json({
       message: "the product deleted successfully",
       success: true,
@@ -157,10 +178,10 @@ router.put("/update/:id", async (req, res) => {
         name: req.body.name,
         description: req.body.description,
         brand: req.body.brand,
-        price: req.body.price,        
-        countInStock: req.body.countInStock,       
+        price: req.body.price,
+        countInStock: req.body.countInStock,
         ifFeatured: req.body.ifFeatured,
-        subCategory:req.body.subCategory
+        subCategory: req.body.subCategory,
       },
       {
         new: true,
@@ -178,6 +199,5 @@ router.put("/update/:id", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;
