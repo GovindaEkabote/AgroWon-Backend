@@ -8,8 +8,9 @@ const router = express.Router();
 
 router.get("/get-product", async (req, res) => {
   try {
+    const filterKey = req.query.product;
     const { page, all } = req.query;
-    const perPage = 5;
+    const perPage = 8;
     const totalPosts = await Products.countDocuments();
     const totalPages = Math.ceil(totalPosts / perPage);
     if (page > totalPages) {
@@ -19,6 +20,7 @@ router.get("/get-product", async (req, res) => {
       const categoryList = await Products.find();
       return res.json({ categoryList });
     }
+
     const products = await Products.find()
       .populate("category")
       .skip((page - 1) * perPage)
@@ -30,7 +32,13 @@ router.get("/get-product", async (req, res) => {
     }
     res
       .status(200)
-      .json({ success: true, "products":products, totalPages: totalPages, page: page });
+      .json({
+        success: true,
+        products: products,
+        totalPages: totalPages,
+        page: page,
+        totalPosts: totalPosts,
+      });
   } catch (error) {
     res.status(500).json({
       message: "Something went wrong",
@@ -38,6 +46,14 @@ router.get("/get-product", async (req, res) => {
       error: error.message,
     });
   }
+});
+
+router.get("/feature", async (req, res) => {
+  const productList = await Products.find({ isFeatured: true });
+  if (!productList) {
+    res.status(500).json({ success: false });
+  }
+  return res.status(200).json(productList);
 });
 
 router.post("/create-product", async (req, res) => {
