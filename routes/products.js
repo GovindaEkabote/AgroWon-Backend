@@ -8,45 +8,95 @@ const router = express.Router();
 
 router.get("/get-product", async (req, res) => {
   try {
-    const filterKey = req.query.product;
-    const { page, all } = req.query;
-    const perPage = 8;
-    const totalPosts = await Products.countDocuments();
-    const totalPages = Math.ceil(totalPosts / perPage);
-    if (page > totalPages) {
-      return res.status(404).json({ message: "Page not found" });
-    }
-    if (all === "true") {
-      const categoryList = await Products.find();
-      return res.json({ categoryList });
+    const { 
+      page = 1,
+      perPage = 8,
+      all, 
+      category, // Category name
+      sortBy = "category",
+      sortOrder = "asc"
+    } = req.query;
+
+    const currentPage = Math.max(1, parseInt(page));
+    const itemsPerPage = Math.max(1, parseInt(perPage));
+
+    // Build base query
+    const query = {};
+
+    // If category is provided, find the corresponding category _id
+    if (category) {
+      const categoryDoc = await Category.findOne({ name: { $regex: new RegExp(`^${category}$`, "i") } });
+
+      if (!categoryDoc) {
+        return res.status(404).json({ 
+          success: false,
+          message: "Category not found" 
+        });
+      }
+      
+      query["category"] = categoryDoc._id; // Use _id instead of name
     }
 
-    const products = await Products.find()
+    // Count total matching products
+    const totalPosts = await Products.countDocuments(query);
+    const totalPages = Math.ceil(totalPosts / itemsPerPage);
+
+    if (currentPage > totalPages && totalPages > 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Page not found" 
+      });
+    }
+
+    if (all === "true") {
+      const products = await Products.find(query).populate("category").exec();
+      return res.json({ success: true, products, totalPosts });
+    }
+
+    // Sorting options
+    const sortOptions = {};
+    if (sortBy === "category") sortOptions["category"] = sortOrder === "asc" ? 1 : -1;
+    else if (sortBy === "price") sortOptions.price = sortOrder === "asc" ? 1 : -1;
+    else if (sortBy === "rating") sortOptions.rating = sortOrder === "asc" ? 1 : -1;
+    else if (sortBy === "date") sortOptions.dateCreated = sortOrder === "asc" ? 1 : -1;
+
+    // Fetch products
+    const products = await Products.find(query)
       .populate("category")
-      .skip((page - 1) * perPage)
-      .limit(perPage)
+      .sort(sortOptions)
+      .skip((currentPage - 1) * itemsPerPage)
+      .limit(itemsPerPage)
       .exec();
 
-    if (!products) {
-      return res.status(500).json({ message: "Product Not Found.." });
-    }
-    res
-      .status(200)
-      .json({
-        success: true,
-        products: products,
-        totalPages: totalPages,
-        page: page,
-        totalPosts: totalPosts,
+    if (!products.length) {
+      return res.status(404).json({ 
+        success: false,
+        message: "No products found matching your criteria"
       });
+    }
+
+    res.status(200).json({
+      success: true,
+      products,
+      totalPages,
+      currentPage,
+      itemsPerPage,
+      totalPosts,
+      sortBy,
+      sortOrder,
+      ...(category && { filteredCategory: category })
+    });
+
   } catch (error) {
+    console.error("Error in /get-product:", error);
     res.status(500).json({
-      message: "Something went wrong",
       success: false,
-      error: error.message,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
     });
   }
 });
+
 
 router.get("/feature", async (req, res) => {
   const productList = await Products.find({ isFeatured: true });
