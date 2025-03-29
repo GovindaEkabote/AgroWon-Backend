@@ -97,7 +97,6 @@ router.get("/get-product", async (req, res) => {
   }
 });
 
-
 router.get("/feature", async (req, res) => {
   const productList = await Products.find({ isFeatured: true });
   if (!productList) {
