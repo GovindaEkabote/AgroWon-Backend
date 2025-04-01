@@ -22,6 +22,9 @@ app.use('/api/v1', subCategory)
 const products = require('./routes/products')
 app.use('/api/v1',products)
 
+const additionalInfo = require('./routes/additionalInfo');
+app.use('/api/v1',additionalInfo)
+
 mongoose.connect(process.env.CONNECTION_STRING,{}).then(()=>{
     console.log(`DataBase connected to ${process.env.CONNECTION_STRING}`);
 }).catch((error) =>{
