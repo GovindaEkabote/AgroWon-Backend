@@ -69,4 +69,22 @@ router.get("/get-info", async (req, res) => {
   }
 });
 
+router.get("/get-info/:id", async (req, res) => {
+  try {
+    const product = await AdditionalProductInfo.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Information not found" });
+    }
+    res.status(200).json({
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
