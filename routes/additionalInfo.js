@@ -1,6 +1,7 @@
 const express = require("express");
 const AdditionalProductInfo = require("../Models/productAdditionInfo");
 const Products = require("../models/products");
+const { json } = require("body-parser");
 const router = express.Router();
 
 router.post("/create-proinfo", async (req, res) => {
@@ -102,6 +103,38 @@ router.delete("/delete-info/:id", async (req, res) => {
   }
 });
 
-
+router.put("/update-info/:id", async (req, res) => {
+  try {
+    const updateInfo = await AdditionalProductInfo.findByIdAndUpdate(
+      req.params.id,
+      {
+        itemWeight: req.body.itemWeight,
+        itemForm: req.body.itemForm,
+        manufacturer: req.body.manufacturer,
+        netQuantity: req.body.netQuantity,
+        modelNumber: req.body.modelNumber,
+        countryOfOrigin: req.body.countryOfOrigin,
+        productDimensions: req.body.productDimensions,
+        asin: req.body.asin,
+        specificUses: req.body.specificUses,
+        itemHeight: req.body.itemHeight,
+        itemWidth: req.body.itemWidth,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updateInfo) {
+      res.status(404).json({ message: "product info not found for update" });
+    }
+    res.status(200).json({ updateInfo });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+      success: false,
+      error: error.message,
+    });
+  }
+});
 
 module.exports = router;
