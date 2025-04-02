@@ -87,4 +87,21 @@ router.get("/get-info/:id", async (req, res) => {
   }
 });
 
+router.delete("/delete-info/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteInfo = await AdditionalProductInfo.findById(id);
+    if (!deleteInfo) {
+      return res.status(404).json({ message: "Product info not found" });
+    }
+    await AdditionalProductInfo.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Product info deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
+
 module.exports = router;
