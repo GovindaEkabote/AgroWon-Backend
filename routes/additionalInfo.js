@@ -47,12 +47,12 @@ router.get("/get-info", async (req, res) => {
     const products = await Products.find().lean();
     const info = await Promise.all(
       products.map(async (product) => {
-        const additonaInfo = await AdditionalProductInfo.findOne({
-          product: product._id,
+        const additionalInfo = await AdditionalProductInfo.findOne({
+          productId: product.productId, // Match UUID (not _id)
         }).lean();
         return {
           ...product,
-          additonaInfo: additonaInfo || null,
+          additionalInfo: additionalInfo || null,
         };
       })
     );

@@ -4,7 +4,7 @@ const additionalInfoSchema = new mongoose.Schema({
     productId: {
         type: String,
         required: true,
-        ref: "Product",
+        ref: "Products",
       },
   itemWeight: {
     type: String,
