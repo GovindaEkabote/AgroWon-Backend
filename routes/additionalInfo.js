@@ -125,11 +125,11 @@ router.put("/update-info/:id", async (req, res) => {
       }
     );
     if (!updateInfo) {
-      res.status(404).json({ message: "product info not found for update" });
+     return res.status(404).json({ message: "product info not found for update" });
     }
-    res.status(200).json({ updateInfo });
+    return res.status(200).json({ updateInfo });
   } catch (error) {
-    res.status(500).json({
+   return res.status(500).json({
       message: "Something went wrong",
       success: false,
       error: error.message,

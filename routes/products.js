@@ -168,6 +168,18 @@ router.post("/create-product", async (req, res) => {
       quantity: req.body.quantity || [],
       rating: req.body.rating || 0,
       isFeatured: req.body.isFeatured || false, // Fixed naming issue
+
+      itemWeight: req.body.itemWeight,
+      itemForm: req.body.itemForm,
+      manufacturer: req.body.manufacturer,
+      netQuantity: req.body.netQuantity,
+      modelNumber: req.body.modelNumber,
+      countryOfOrigin: req.body.countryOfOrigin,
+      productDimensions: req.body.productDimensions,
+      asin: req.body.asin,
+      specificUses: req.body.specificUses,
+      itemHeight: req.body.itemHeight,
+      itemWidth: req.body.itemWidth,
     });
 
     await product.save();

@@ -79,6 +79,50 @@ const productSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  itemWeight: {
+    type: String,
+    required: true,
+  },
+  itemForm: {
+    type: String,
+    required: true,
+  },
+  manufacturer: {
+    type: String,
+    required: true,
+  },
+  netQuantity: {
+    type: String,
+    required: true,
+  },
+  modelNumber: {
+    type: String,
+    required: true,
+  },
+  countryOfOrigin: {
+    type: String,
+    required: true,
+  },
+  productDimensions: {
+    type: String,
+    required: true,
+  },
+  asin: {
+    type: String,
+    required: true,
+  },
+  specificUses: {
+    type: String,
+    required: true,
+  },
+  itemHeight: {
+    type: String,
+    required: true,
+  },
+  itemWidth: {
+    type: String,
+    required: true,
+  },
 });
 
 const Products = mongoose.model("Products", productSchema);
