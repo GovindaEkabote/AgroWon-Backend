@@ -277,4 +277,33 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
+router.get("/products/category/:id", async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+
+    // Check if the category exists
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ success: false, message: "Category not found" });
+    }
+
+    // Find products by category ID
+    const products = await Products.find({ category: categoryId }).populate("category");
+
+    if (!products.length) {
+      return res.status(404).json({ success: false, message: "No products found for this category" });
+    }
+
+    res.status(200).json({ success: true, category: category.name, products });
+  } catch (error) {
+    console.error("Error fetching products by category ID:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
+
+
 module.exports = router;
