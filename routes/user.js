@@ -61,8 +61,9 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign(
       { email: result.email, id: result._id },
-      process.env.TOKEN,{
-        expiresIn:'7d'
+      process.env.TOKEN,
+      {
+        expiresIn: "7d",
       }
     );
 
@@ -77,7 +78,30 @@ router.post("/signup", async (req, res) => {
 
 router.post("/signin", async (req, res) => {
   try {
-  } catch (error) {}
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const existUser = await User.findOne({ email });
+    if (!existUser) {
+      return res.status(404).json({ message: "Invalid Email and Password" });
+    }
+    const comparePassword = await bcrypt.compare(password, existUser.password);
+    if (!comparePassword) {
+      return res.status(404).json({ message: "Invalid Email and Password" });
+    }
+    const token = jwt.sign(
+        { email: existUser.email, id: existUser._id },
+        process.env.TOKEN,
+        { expiresIn: "7d" }
+      );
+    res.status(200).json({ success: true, existUser, token,message:"Login Successful" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
 });
 
 module.exports = router;
