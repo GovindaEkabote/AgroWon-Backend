@@ -7,6 +7,7 @@ const states = require("./Controllers/stateName");
 const product = require('./routes/products')
 const category = require('./routes/category')
 const subCategory = require('./routes/subCategory')
+const User = require('./routes/user')
 app.use(cors());
 
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use("/api", states);
 app.use('/api/v1',product)
 app.use('/api/v1',category)
 app.use('/api/v1',subCategory)
+app.use('/api/v1',User)
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

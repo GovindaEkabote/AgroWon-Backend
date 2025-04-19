@@ -25,6 +25,9 @@ app.use('/api/v1',products)
 const additionalInfo = require('./routes/additionalInfo');
 app.use('/api/v1',additionalInfo)
 
+const user = require('./routes/user');
+app.use('/api/v1',user)
+
 mongoose.connect(process.env.CONNECTION_STRING,{}).then(()=>{
     console.log(`DataBase connected to ${process.env.CONNECTION_STRING}`);
 }).catch((error) =>{

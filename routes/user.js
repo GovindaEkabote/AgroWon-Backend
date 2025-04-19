@@ -21,7 +21,9 @@ router.post("/signup", async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
@@ -57,11 +59,25 @@ router.post("/signup", async (req, res) => {
       profile: uploadedImages,
     });
 
-    res.status(201).json({ success: true, result });
+    const token = jwt.sign(
+      { email: result.email, id: result._id },
+      process.env.TOKEN,{
+        expiresIn:'7d'
+      }
+    );
+
+    res.status(201).json({ success: true, result, token });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Something went wrong", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
   }
+});
+
+router.post("/signin", async (req, res) => {
+  try {
+  } catch (error) {}
 });
 
 module.exports = router;
