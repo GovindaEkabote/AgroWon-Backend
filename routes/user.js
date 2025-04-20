@@ -140,4 +140,17 @@ router.put('/update-user/:id',async(req,res) =>{
 })
 })
 
+router.delete('/delete-user',async(req,res) =>{
+  const user = await User.findByIdAndDelete(req.params.id);
+  if(!user)
+    {
+        return res.status(404).json({
+            message:"User Not Found",
+        })
+    }
+    res.status(200).json({
+        message:"User Deleted Successfully",
+    })
+})
+
 module.exports = router;
