@@ -125,4 +125,19 @@ router.get('/users',async(req,res) =>{
     users
   })
 })
+
+router.put('/update-user/:id',async(req,res) =>{
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new:true
+    }
+  )
+  res.status(200).json({
+    message:"User Updated Successfully",
+    user
+})
+})
+
 module.exports = router;
