@@ -140,7 +140,7 @@ router.put('/update-user/:id',async(req,res) =>{
 })
 })
 
-router.delete('/delete-user',async(req,res) =>{
+router.delete('/delete-user/:id',async(req,res) =>{
   const user = await User.findByIdAndDelete(req.params.id);
   if(!user)
     {
@@ -151,6 +151,11 @@ router.delete('/delete-user',async(req,res) =>{
     res.status(200).json({
         message:"User Deleted Successfully",
     })
+})
+
+router.post('/logout' ,(req,res) =>{
+  res.clearCookie('token'); // make sure 'token' matches your cookie name
+res.status(200).json({ message: 'Logout successful' });
 })
 
 module.exports = router;
