@@ -7,7 +7,7 @@ const cloudinary = require("../config/cloudinary");
 
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
+router.post("/signup-ecom", async (req, res) => {
   try {
     const { name, phone, email, password, profile } = req.body;
 
@@ -76,6 +76,49 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+router.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const userExist = await User.findOne({ email });
+    if (userExist) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const result = await User.create({
+      name,
+      email,
+      password: hashPassword,
+    });
+
+    const token = jwt.sign(
+      { email: result.email, id: result._id },
+      process.env.TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.status(201).json({ success: true, result, token });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;

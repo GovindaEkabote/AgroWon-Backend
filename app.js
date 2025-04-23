@@ -7,10 +7,15 @@ const dotenv = require("dotenv");
 
 const authJwt = require("./helper");
 dotenv.config();
-app.use(cors());
+app.use(cors({
+  origin: "*", 
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 app.options("*", cors());
 app.use(express.json());
-app.use(authJwt());
+// app.use(authJwt());
 app.use(bodyParser.json());
 
 // Routes..

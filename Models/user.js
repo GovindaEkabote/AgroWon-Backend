@@ -7,7 +7,6 @@ const userSchema = mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
@@ -22,11 +21,11 @@ const userSchema = mongoose.Schema({
     {
       public_id: {
         type: String,
-        required: true,
+        // required: true,
       },
       url: {
         type: String,
-        required: true,
+        // required: true,
       },
     },
   ],
