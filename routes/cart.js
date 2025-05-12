@@ -1,13 +1,13 @@
-const { json } = require("body-parser");
-const Cart = require("../Models/cart");
 const express = require("express");
 const router = express.Router();
+const Cart = require("../Models/cart"); 
 
-router.get("/", async (req, res) => {
+// GET all cart items (with optional filters via query)
+router.get("/cart", async (req, res) => {
   try {
     const cartList = await Cart.find(req.query);
-    if (!cartList) {
-      res.status(500).json({ success: false });
+    if (!cartList || cartList.length === 0) {
+      return res.status(404).json({ success: false, message: "Cart is empty" });
     }
     res.status(200).json(cartList);
   } catch (error) {
@@ -15,69 +15,47 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/add", async (req, res) => {
+// POST add new cart item
+router.post("/cart/add", async (req, res) => {
   try {
-    let cartList = new Cart({
-      productTitle: req.body.productTitle,
-      image: req.body.image,
-      rating: req.body.rating,
-      price: req.body.price,
-      quantity: req.body.quantity,
-      subTotal: req.body.subTotal,
-      productId: req.body.productId,
-      userId: req.body.userId,
+    const newCartItem = new Cart({ ...req.body });
+    const savedItem = await newCartItem.save();
+    res.status(201).json(savedItem);
+  } catch (error) {
+    res.status(500).json({ success: false, error });
+  }
+});
+
+// PUT update cart item by ID
+router.put("/cart/:id", async (req, res) => {
+  try {
+    const updatedCart = await Cart.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
     });
-    if (!cartList) {
-      res.status(500).json({
-        error: err,
-        success: false,
-      });
+    if (!updatedCart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
     }
-    cartList = await cartList.save();
-    res.status(200).json(cartList);
+    res.status(200).json(updatedCart);
   } catch (error) {
     res.status(500).json({ success: false, error });
   }
 });
 
-router.delete("/:id", async (req, res) => {
+// DELETE cart item by ID
+router.delete("/cart/:id", async (req, res) => {
   try {
-    const cartList = await Cart.findById(req.params.id);
-    if (!cartList) {
-      res.status(404).json({ message: "Product not found" });
+    const deleted = await Cart.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
     }
-    const deleteProduct = await Cart.findByIdAndDelete(req.params.id);
-    if (!deleteProduct) {
-      res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({ message: "product deleted Successfully" });
+    res.status(200).json({ message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, error });
   }
-});
-
-router.put("/:id", async (req, res) => {
-  const cartList = await Cart.findByIdAndUpdate(
-    req.params.id,
-    {
-      productTitle: req.body.productTitle,
-      image: req.body.image,
-      rating: req.body.rating,
-      price: req.body.price,
-      quantity: req.body.quantity,
-      subTotal: req.body.subTotal,
-      productId: req.body.productId,
-      userId: req.body.userId,
-    },
-    { new: true }
-  );
-  if(!cartList){
-    return res.status(500).json({
-        message:"Cart item cannot be update",
-        success:false
-    })
-  }
-  res.send(cartList)
 });
 
 module.exports = router;

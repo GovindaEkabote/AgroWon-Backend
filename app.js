@@ -36,6 +36,8 @@ app.use("/api/v1", additionalInfo);
 const user = require("./routes/user");
 app.use("/api/v1", user);
 
+
+
 mongoose
   .connect(process.env.CONNECTION_STRING, {})
   .then(() => {

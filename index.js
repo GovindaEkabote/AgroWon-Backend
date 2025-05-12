@@ -8,6 +8,7 @@ const product = require('./routes/products')
 const category = require('./routes/category')
 const subCategory = require('./routes/subCategory')
 const User = require('./routes/user')
+const Cart = require('./routes/cart')
 app.use(cors());
 
 app.use(express.json());
@@ -29,6 +30,7 @@ app.use('/api/v1',product)
 app.use('/api/v1',category)
 app.use('/api/v1',subCategory)
 app.use('/api/v1',User)
+app.use('/api/v1',Cart)
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
