@@ -9,9 +9,9 @@ const router = express.Router();
 
 router.post("/signup-ecom", async (req, res) => {
   try {
-    const { name, phone, email, password, profile } = req.body;
+    const { name, phone, email, password } = req.body;
 
-    if (!name || !phone || !email || !password || !profile) {
+    if (!name || !phone || !email || !password ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -27,36 +27,11 @@ router.post("/signup-ecom", async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-
-    const limit = pLimit(1);
-    const imagesToUpload = profile.map((image) =>
-      limit(async () => {
-        try {
-          const result = await cloudinary.uploader.upload(image);
-          return { public_id: result.public_id, url: result.secure_url };
-        } catch (error) {
-          return { error: error.message };
-        }
-      })
-    );
-
-    const uploadResults = await Promise.all(imagesToUpload);
-    const uploadedImages = uploadResults.filter((img) => !img.error);
-
-    if (uploadedImages.length === 0) {
-      return res.status(500).json({
-        message: "Image upload failed",
-        success: false,
-        errors: uploadResults.filter((img) => img.error),
-      });
-    }
-
     const result = await User.create({
       name,
       phone,
       email,
       password: hashPassword,
-      profile: uploadedImages,
     });
 
     const token = jwt.sign(
@@ -86,7 +61,10 @@ router.post("/signup", async (req, res) => {
 
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(409).json({ 
+        success: false,
+        message: "Email already registered" 
+      });
     }
 
     if (password.length < 6) {
@@ -119,6 +97,8 @@ router.post("/signup", async (req, res) => {
       .json({ message: "Something went wrong", error: error.message });
   }
 });
+
+
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
