@@ -9,33 +9,51 @@ router.get("/", async (req, res) => {
     if (!cartList) {
       res.status(500).json({ success: false });
     }
-    return res.status(200), json(cartList);
+    res.status(200).json(cartList);
   } catch (error) {
-    res.status(500), json({ success: false });
+    res.status(500).json({ success: false, error });
   }
 });
 
 router.post("/add", async (req, res) => {
-  let cartList = new Cart({
-    productTitle: req.body.productTitle,
-    image: req.body.image,
-    rating: req.body.rating,
-    price: req.body.price,
-    quantity: req.body.quantity,
-    subTotal: req.body.subTotal,
-    productId: req.body.productId,
-    userId: req.body.userId,
-  });
-  if (!cartList) {
-    res.status(500).json({
-      error: err,
-      success: false,
+  try {
+    let cartList = new Cart({
+      productTitle: req.body.productTitle,
+      image: req.body.image,
+      rating: req.body.rating,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      subTotal: req.body.subTotal,
+      productId: req.body.productId,
+      userId: req.body.userId,
     });
+    if (!cartList) {
+      res.status(500).json({
+        error: err,
+        success: false,
+      });
+    }
+    cartList = await cartList.save();
+    res.status(200).json(cartList);
+  } catch (error) {
+    res.status(500).json({ success: false, error });
   }
-  cartList = await cartList.save();
-  return res.status(200), json(cartList);
 });
 
-
+router.delete("/:id", async (req, res) => {
+  try {
+    const cartList = await Cart.findById(req.params.id);
+    if (!cartList) {
+      res.status(404).json({ message: "Product not found" });
+    }
+    const deleteProduct = await Cart.findByIdAndDelete(req.params.id);
+    if (!deleteProduct) {
+      res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json({ message: "product deleted Successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, error });
+  }
+});
 
 module.exports = router;
