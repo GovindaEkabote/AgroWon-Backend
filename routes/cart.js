@@ -56,4 +56,28 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  const cartList = await Cart.findByIdAndUpdate(
+    req.params.id,
+    {
+      productTitle: req.body.productTitle,
+      image: req.body.image,
+      rating: req.body.rating,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      subTotal: req.body.subTotal,
+      productId: req.body.productId,
+      userId: req.body.userId,
+    },
+    { new: true }
+  );
+  if(!cartList){
+    return res.status(500).json({
+        message:"Cart item cannot be update",
+        success:false
+    })
+  }
+  res.send(cartList)
+});
+
 module.exports = router;
