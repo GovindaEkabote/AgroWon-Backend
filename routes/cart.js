@@ -15,16 +15,25 @@ router.get("/cart", async (req, res) => {
   }
 });
 
-// POST add new cart item
+// POST /cart/add
 router.post("/cart/add", async (req, res) => {
   try {
     const newCartItem = new Cart({ ...req.body });
     const savedItem = await newCartItem.save();
-    res.status(201).json(savedItem);
+    res.status(201).json({
+      success: true,
+      message: "Item added to cart successfully",
+      data: savedItem,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, error });
+    res.status(500).json({
+      success: false,
+      message: "Failed to add item to cart",
+      error: error.message,
+    });
   }
 });
+
 
 // PUT update cart item by ID
 router.put("/cart/:id", async (req, res) => {
