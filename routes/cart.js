@@ -18,8 +18,22 @@ router.get("/cart", async (req, res) => {
 // POST /cart/add
 router.post("/cart/add", async (req, res) => {
   try {
+    const { productId, userId } = req.body;
+
+    // Check if item already exists in the cart for the user
+    const existingItem = await Cart.findOne({ productId, userId });
+
+    if (existingItem) {
+      return res.status(400).json({
+        success: false,
+        message: "Item already exists in cart",
+      });
+    }
+
+    // Save new item
     const newCartItem = new Cart({ ...req.body });
     const savedItem = await newCartItem.save();
+
     res.status(201).json({
       success: true,
       message: "Item added to cart successfully",
@@ -33,6 +47,7 @@ router.post("/cart/add", async (req, res) => {
     });
   }
 });
+
 
 
 // PUT update cart item by ID
